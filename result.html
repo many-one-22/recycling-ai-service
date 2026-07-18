@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>분리배출 결과</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f9f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        .result-tag {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+            font-size: 24px;
+        }
+        .guide-box {
+            text-align: left;
+            background-color: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #4caf50;
+        }
+        .guide-step {
+            margin-bottom: 10px;
+            font-size: 15px;
+            color: #555;
+        }
+        .guide-step span {
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        .retry-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="result-tag">분석 완료</div>
+        <h1>이 쓰레기는 <strong>[페트병]</strong> 입니다!</h1>
+        
+        <div class="guide-box">
+            <div class="guide-step"><span>1단계</span> 내용물을 비우고 물로 헹구기🧼</div>
+            <div class="guide-step"><span>2단계</span> 비닐 라벨은 깨끗이 떼어내기🏷️</div>
+            <div class="guide-step"><span>3단계</span> 꽉 압착한 뒤 플라스틱으로 배출하기♻️</div>
+        </div>
+        
+        <button class="retry-btn">다시 촬영하기</button>
+    </div>
+
+</body>
+</html>
