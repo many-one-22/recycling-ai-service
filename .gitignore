@@ -1,0 +1,21 @@
+# 데이터 (용량 크므로 git에 올리지 않음, Google Drive로 공유)
+data/raw/
+data/processed/
+dataset/
+*.zip
+*.tar
+*.zip.part*
+ 
+# 학습된 모델 체크포인트
+checkpoints/
+*.pt
+*.pth
+ 
+# 파이썬 가상환경 / 캐시
+venv/
+__pycache__/
+*.pyc
+ 
+# OS
+.DS_Store
+ 
