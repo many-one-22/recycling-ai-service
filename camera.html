@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 분리배출 안내 서비스</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- [화면 1] 카메라 촬영 화면 -->
+    <div id="camera-view" class="view">
+        <header>
+            <h2>생활폐기물 촬영</h2>
+            <p>사각형 가이드 안에 쓰레기가 들어오게 해주세요.</p>
+        </header>
+
+        <!-- 가운데 카메라가 들어갈 빈 네모 박스 -->
+        <div class="camera-box">
+            <!-- 2주차에 여기에 <video> 태그가 들어갈 예정입니다 -->
+            <div class="camera-placeholder">카메라 화면 영역</div>
+        </div>
+
+        <!-- 아래 동그란 버튼 -->
+        <div class="bottom-area">
+            <button id="capture-btn" class="circle-btn" aria-label="촬영하기"></button>
+        </div>
+    </div>
+
+    <!-- [화면 2] 분석 중 로딩 화면 (초기에는 숨김 처리) -->
+    <div id="loading-view" class="view hidden">
+        <div class="loading-container">
+            <!-- 로딩 스피너 애니메이션 -->
+            <div class="spinner"></div>
+            <h3>AI가 폐기물을 분석하고 있습니다</h3>
+            <p>잠시만 기다려주세요...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
