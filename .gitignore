@@ -5,6 +5,7 @@ dataset/
 *.zip
 *.tar
 *.zip.part*
+*.jpg
  
 # 학습된 모델 체크포인트
 checkpoints/
