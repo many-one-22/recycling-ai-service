@@ -1,0 +1,195 @@
+/*
+  camera.css
+  02_카메라 촬영 화면 + 03_분석 중 로딩 화면 전용 스타일
+  색상/폰트/버튼 등 공통 스타일은 fe-ui/css/common.css에서 관리 예정이라
+  여기서는 카메라 뷰와 로딩 오버레이의 레이아웃/구조 스타일만 정의합니다.
+*/
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+/* hidden 속성으로 화면 전환을 제어하므로, display를 지정하는 다른 규칙보다 항상 우선하도록 고정 */
+[hidden] {
+  display: none !important;
+}
+
+/* 모바일 세로 화면 기준 레이아웃 */
+.camera-view {
+  max-width: 375px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+/* 헤더 */
+.camera-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  position: relative;
+}
+
+.back-btn {
+  border: none;
+  background: none;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.header-title {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  margin-right: 36px; /* 뒤로가기 버튼과 균형을 맞춰 타이틀을 중앙에 배치 */
+  font-size: 17px;
+}
+
+.camera-guide {
+  width: 100%;
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0 20px;
+}
+
+/* 카메라 프리뷰(스캔 영역) */
+.camera-viewfinder {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-color: #000;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.camera-viewfinder video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 네 귀퉁이 코너 브래킷 ('ㄱ' 모양) */
+.corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #ffffff;
+}
+
+.corner-top-left {
+  top: 16px;
+  left: 16px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-top-right {
+  top: 16px;
+  right: 16px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-bottom-left {
+  bottom: 16px;
+  left: 16px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-bottom-right {
+  bottom: 16px;
+  right: 16px;
+  border-left: none;
+  border-top: none;
+}
+
+/* 카메라 권한/에러 안내 문구 */
+.camera-error {
+  width: 100%;
+  text-align: center;
+  color: #d32f2f;
+  font-size: 13px;
+  margin: 12px 0 0;
+}
+
+/* 촬영 버튼 영역 */
+.shutter-area {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shutter-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  border: 4px solid #333333;
+  cursor: pointer;
+  padding: 0;
+}
+
+.shutter-btn:active {
+  transform: scale(0.92);
+}
+
+.shutter-hint {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #888;
+}
+
+/* 03_분석 중 로딩 화면 (오버레이) */
+.loading-view {
+  position: fixed;
+  inset: 0;
+  background-color: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  text-align: center;
+}
+
+.spinner {
+  width: 56px;
+  height: 56px;
+  border: 5px solid #e0e0e0;
+  border-top: 5px solid #4caf50;
+  border-radius: 50%;
+  margin-bottom: 24px;
+  animation: camera-spin 1s linear infinite;
+}
+
+@keyframes camera-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #222;
+}
+
+.loading-desc {
+  margin: 0;
+  font-size: 14px;
+  color: #777;
+  line-height: 1.5;
+}
