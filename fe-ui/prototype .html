@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>클래시파이 - 전체 프로토타입</title>
+    <style>
+        /* --- 공통 스타일 초기화 --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f8f9fa;
+            overflow: hidden; /* 화면 스크롤 방지 */
+        }
+
+        /* 화면 배치 공통 스타일 */
+        .view {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* 기본적으로 중앙 정렬 */
+            align-items: center;
+            padding: 30px 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f8f9fa 100%); /* 전체 배경 통일감 */
+        }
+
+        /* 화면 숨김 처리용 클래스 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- [화면 1] 메인 화면 스타일 --- */
+        .main-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 100, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 380px;
+        }
+        .main-container h1 { color: #28a745; margin-bottom: 10px; font-size: 28px; }
+        .main-container p { color: #6c757d; font-size: 15px; margin-bottom: 30px; line-height: 1.5; }
+        
+        .start-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .start-btn:active { background-color: #218838; }
+
+        /* --- [화면 2] 카메라 촬영 화면 스타일 --- */
+        #camera-view {
+            justify-content: space-between; /* 카메라 뷰는 위아래 분산을 위해 덮어쓰기 */
+            background-color: #f8f9fa;
+        }
+        #camera-view header { text-align: center; margin-top: 10px; }
+        #camera-view header h2 { color: #212529; font-size: 22px; margin-bottom: 8px; }
+        #camera-view header p { color: #6c757d; font-size: 14px; }
+
+        .camera-box {
+            width: 100%;
+            max-width: 380px;
+            aspect-ratio: 3 / 4;
+            border: 3px dashed #28a745;
+            border-radius: 16px;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+        .camera-placeholder { color: #495057; font-weight: bold; font-size: 16px; }
+
+        .bottom-area { margin-bottom: 20px; }
+        .circle-btn {
+            width: 76px; height: 76px;
+            border-radius: 50%;
+            border: 6px solid #ffffff;
+            background-color: #28a745;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.1s ease, background-color 0.2s;
+        }
+        .circle-btn:active { transform: scale(0.92); background-color: #218838; }
+
+        /* --- [화면 3] 분석 중 로딩 화면 스타일 --- */
+        #loading-view { background-color: rgba(255, 255, 255, 0.96); z-index: 10; }
+        .loading-container { text-align: center; }
+        .spinner {
+            width: 55px; height: 55px;
+            border: 6px solid #e9ecef; border-top: 6px solid #28a745;
+            border-radius: 50%; margin: 0 auto 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #loading-view h3 { color: #212529; font-size: 20px; margin-bottom: 10px; }
+        #loading-view p { color: #6c757d; font-size: 14px; }
+
+        /* --- [화면 4] 결과 화면 스타일 --- */
+        .result-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        .result-img { font-size: 60px; margin-bottom: 15px; }
+        .result-title { color: #212529; font-size: 24px; margin-bottom: 15px; }
+        .result-desc {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            color: #495057;
+            font-size: 15px;
+            text-align: left;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- [화면 1] 메인 시작 화면 -->
+    <div id="main-view" class="view">
+        <div class="main-container">
+            <h1>클래시파이 ♻️</h1>
+            <p>헷갈리는 분리배출,<br>사진 한 장으로 간편하게 해결하세요.</p>
+            <button id="start-btn" class="start-btn">📷 사진 촬영 시작하기</button>
+        </div>
+    </div>
+
+    <!-- [화면 2] 카메라 촬영 화면 (숨김) -->
+    <div id="camera-view" class="view hidden">
+        <header>
+            <h2>생활폐기물 촬영</h2>
+            <p>네모 박스 안에 폐기물이 가득 차게 담아주세요.</p>
+        </header>
+        <div class="camera-box">
+            <div class="camera-placeholder">카메라 영역 </div>
+        </div>
+        <div class="bottom-area">
+            <button id="capture-btn" class="circle-btn" title="촬영하기"></button>
+        </div>
+    </div>
+
+    <!-- [화면 3] 분석 중 로딩 화면 (숨김) -->
+    <div id="loading-view" class="view hidden">
+        <div class="loading-container">
+            <div class="spinner"></div>
+            <h3>AI가 폐기물을 분석하고 있습니다</h3>
+            <p>잠시만 기다려주세요...</p>
+        </div>
+    </div>
+
+    <!-- [화면 4] 결과 화면 (숨김) -->
+    <div id="result-view" class="view hidden">
+        <div class="result-card">
+            <div class="result-img">🍾</div>
+            <h2 class="result-title">투명 유리병</h2>
+            <div class="result-desc">
+                <strong>💡 올바른 분리배출 방법</strong><br><br>
+                1. 내용물을 완전히 비우고 물로 헹궈주세요.<br>
+                2. 뚜껑(철/플라스틱)은 분리해서 따로 배출하세요.<br>
+                3. 깨진 유리는 신문지에 싸서 종량제 봉투에 버려야 합니다.
+            </div>
+            <button id="retry-btn" class="start-btn" style="background-color: #6c757d;">처음으로 돌아가기</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM 요소 선언
+        const mainView = document.getElementById('main-view');
+        const cameraView = document.getElementById('camera-view');
+        const loadingView = document.getElementById('loading-view');
+        const resultView = document.getElementById('result-view');
+
+        const startBtn = document.getElementById('start-btn');
+        const captureBtn = document.getElementById('capture-btn');
+        const retryBtn = document.getElementById('retry-btn');
+
+        // 특정 화면만 보여주는 공통 함수
+        function showView(viewToShow) {
+            // 모든 화면 숨기기
+            mainView.classList.add('hidden');
+            cameraView.classList.add('hidden');
+            loadingView.classList.add('hidden');
+            resultView.classList.add('hidden');
+            
+            // 원하는 화면만 나타내기
+            viewToShow.classList.remove('hidden');
+        }
+
+        // 1. 메인 화면 -> 촬영 화면으로 이동
+        startBtn.addEventListener('click', () => {
+            showView(cameraView);
+        });
+
+        // 2. 촬영 화면 -> 로딩 화면 -> 결과 화면으로 이동 로직
+        captureBtn.addEventListener('click', () => {
+            // 촬영 버튼 누르면 즉시 로딩 화면 표시
+            showView(loadingView);
+            
+            // 가상 타이머: 3초 후 결과 화면으로 자동 전환 (2주 차 백엔드 연동 전 데모용)
+            setTimeout(() => {
+                showView(resultView);
+            }, 3000);
+        });
+
+        // 3. 결과 화면 -> 다시 메인 화면으로 복귀
+        retryBtn.addEventListener('click', () => {
+            showView(mainView);
+        });
+    </script>
+</body>
+</html>
