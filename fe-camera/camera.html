@@ -19,14 +19,16 @@
       <h1 class="header-title">촬영하기</h1>
     </header>
 
-    <p class="camera-guide">폐기물을 네모 박스 안에 맞춰주세요</p>
+        <!-- 가운데 카메라가 들어갈 빈 네모 박스 -->
+        <div class="camera-box">
+            <!-- 2주차에 여기에 <video> 태그가 들어갈 예정입니다 -->
+            <div class="camera-placeholder">카메라 화면 영역</div>
+        </div>
 
-    <div class="camera-viewfinder">
-      <video id="camera-stream" autoplay playsinline muted></video>
-      <span class="corner corner-top-left"></span>
-      <span class="corner corner-top-right"></span>
-      <span class="corner corner-bottom-left"></span>
-      <span class="corner corner-bottom-right"></span>
+        <!-- 아래 동그란 버튼 -->
+        <div class="bottom-area">
+            <button id="capture-btn" class="circle-btn" aria-label="촬영하기"></button>
+        </div>
     </div>
 
     <p id="camera-error" class="camera-error" hidden></p>
