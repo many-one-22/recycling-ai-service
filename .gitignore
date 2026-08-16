@@ -1,6 +1,7 @@
 # 데이터 (용량 크므로 git에 올리지 않음, Google Drive로 공유)
 data/raw/
 data/processed/
+data/processed_200/
 dataset/
 *.zip
 *.tar

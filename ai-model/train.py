@@ -20,7 +20,7 @@ import os
 # pip install split-folders 실행 필수
 import splitfolders
 # 사진을 모아둔 원본 폴더 경로
-input_folder = "./data/processed"
+input_folder = "./data/processed_200"
 # input_folder = "/content/drive/MyDrive/AICOSS 2026 WE-Meet/data/raw" 
 # 코드가 자동으로 train과 val로 나누어서 저장할 새로운 폴더 이름
 output_folder = "./dataset"
@@ -87,7 +87,7 @@ for param in model.parameters():
     param.requires_grad = False
 
 # 3. 마지막 출력층(Classifier) 수정하기
-# 우리의 클래스 개수 (투명 페트병, 캔, 종이팩, 유리병 = 총 4개)
+# 우리의 클래스 개수 (페트병, 캔, 종이, 유리병 = 총 4개)
 num_classes = len(class_names) 
 
 # MobileNetV2의 classifier[1]이 원래 1000개를 분류하던 것을 4개로 수정
@@ -175,7 +175,11 @@ def train_model(model, criterion, optimizer, num_epochs=10):
 model_ft = train_model(model, criterion, optimizer, num_epochs=10)
 
 # 최고 성능의 모델을 파일로 저장
-torch.save(model_ft.state_dict(), 'best_recycling_model.pth')
+# 모델 가중치와 클래스 이름을 모두 저장하기
+torch.save({
+    "model_state_dict": model_ft.state_dict(),
+    "classes": class_names,
+}, 'best_recycling_model.pth')
 print("모델이 'best_recycling_model.pth'로 안전하게 저장되었습니다.")
 # save_path = '/content/drive/MyDrive/AICOSS 2026 WE-Meet/best_recycling_model.pth'
 # torch.save(model_ft.state_dict(), save_path)
