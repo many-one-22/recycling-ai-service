@@ -13,6 +13,7 @@ from torch.utils.data import DataLoader
 import time
 import copy
 import os
+from sklearn.metrics import f1_score
 
 
 # 폴더 자동 분할
@@ -101,17 +102,16 @@ model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 
 # 모델 전체가 아니라, 우리가 방금 바꾼 마지막 층(classifier[1])만 학습시킴.
-optimizer = optim.Adam(model.classifier[1].parameters(), lr=0.001)
+optimizer = optim.Adam(model.classifier[1].parameters(), lr=0.0001)
 # 파인 튜닝 후 아래 코드 사용
 # optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 
 # 학습 루프 함수 및 실행
 
-def train_model(model, criterion, optimizer, num_epochs=10):
+def train_model(model, criterion, optimizer, num_epochs=50):
     since = time.time()
 
-    # 가장 성능이 좋았던 모델의 가중치를 복사해둘 변수
     best_model_wts = copy.deepcopy(model.state_dict())
     best_acc = 0.0
 
@@ -121,42 +121,47 @@ def train_model(model, criterion, optimizer, num_epochs=10):
 
         for phase in ['train', 'val']:
             if phase == 'train':
-                model.train()  # 모델을 학습 모드로 설정
+                model.train()
             else:
-                model.eval()   # 모델을 평가 모드로 설정
+                model.eval()
 
             running_loss = 0.0
             running_corrects = 0
 
-            # 데이터를 배치(32장) 단위로 가져와서 반복
+            # F1-score 계산을 위해 예측값/정답값을 에폭 단위로 모아둠
+            all_preds = []
+            all_labels = []
+
             for inputs, labels in dataloaders[phase]:
                 inputs = inputs.to(device)
                 labels = labels.to(device)
 
-                optimizer.zero_grad() # 기울기 초기화
+                optimizer.zero_grad()
 
-                # 순전파 (Forward)
-                # 학습 시에만 연산 기록을 추적
                 with torch.set_grad_enabled(phase == 'train'):
                     outputs = model(inputs)
                     _, preds = torch.max(outputs, 1)
                     loss = criterion(outputs, labels)
 
-                    # 학습(train) 단계일 때만 역전파 및 가중치 업데이트
                     if phase == 'train':
                         loss.backward()
                         optimizer.step()
 
-                # 통계 계산
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
+
+                # 배치마다 예측값/정답값을 CPU로 옮겨서 리스트에 누적
+                all_preds.extend(preds.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
 
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.float() / dataset_sizes[phase]
 
-            print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}')
+            # 에폭 전체 예측 결과로 F1-score 계산 (클래스별 균형을 고려한 macro 평균)
+            epoch_f1 = f1_score(all_labels, all_preds, average='macro')
 
-            # 검증(val) 단계에서 정확도가 기존 최고 기록보다 높으면 저장
+            print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f} F1: {epoch_f1:.4f}')
+
             if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
@@ -167,12 +172,11 @@ def train_model(model, criterion, optimizer, num_epochs=10):
     print(f'학습 완료! 걸린 시간: {time_elapsed // 60:.0f}분 {time_elapsed % 60:.0f}초')
     print(f'가장 높았던 검증 정확도(Best val Acc): {best_acc:4f}')
 
-    # 가장 성능이 좋았던 가중치를 모델에 씌워서 반환
     model.load_state_dict(best_model_wts)
     return model
 
 # 위 함수를 이용해 실제로 학습을 시작
-model_ft = train_model(model, criterion, optimizer, num_epochs=10)
+model_ft = train_model(model, criterion, optimizer, num_epochs=100)
 
 # 최고 성능의 모델을 파일로 저장
 # 모델 가중치와 클래스 이름을 모두 저장하기
