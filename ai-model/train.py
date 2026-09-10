@@ -13,7 +13,24 @@ from torch.utils.data import DataLoader
 import time
 import copy
 import os
+from PIL import Image
 from sklearn.metrics import f1_score
+
+
+# -------------------------------------------------------------
+# [신규] 정사각형 패딩 (letterbox)
+#   - Resize((224,224))가 원본 비율을 무시하고 강제로 찌그러뜨리는 문제를 막기 위함
+#   - 스마트폰으로 세로로 길게(또는 극단적으로 클로즈업) 찍은 사진일수록
+#     이 왜곡이 커져서, 병이 옆으로 눌린 것처럼 학습/인식되는 문제가 있었음
+#   - (114,114,114)는 letterbox padding에 관례적으로 쓰는 중립 회색
+#   - predict.py에도 반드시 동일하게 적용해야 함 (학습/추론 전처리 불일치 방지)
+# -------------------------------------------------------------
+def pad_to_square(image, fill_color=(114, 114, 114)):
+    width, height = image.size
+    max_side = max(width, height)
+    new_image = Image.new("RGB", (max_side, max_side), fill_color)
+    new_image.paste(image, ((max_side - width) // 2, (max_side - height) // 2))
+    return new_image
 
 
 # 폴더 자동 분할
@@ -22,17 +39,17 @@ from sklearn.metrics import f1_score
 import splitfolders
 # 사진을 모아둔 원본 폴더 경로
 input_folder = "./data/processed_200"
-# input_folder = "/content/drive/MyDrive/AICOSS 2026 WE-Meet/data/raw" 
+# input_folder = "/content/drive/MyDrive/AICOSS 2026 WE-Meet/data/raw"
 # 코드가 자동으로 train과 val로 나누어서 저장할 새로운 폴더 이름
 output_folder = "./dataset"
-# output_folder = "/content/dataset" 
-# 원본 데이터를 80%(train)와 20%(val) 비율로 무작위로 섞어서 나눔.
+# output_folder = "/content/dataset"
+
+# 주의: dataset 폴더가 이미 있으면 splitfolders가 에러를 내거나 파일이 섞일 수 있음
+# 재학습 전에는 항상 지우고 새로 만드는 걸 권장 (터미널에서: rm -rf dataset)
 splitfolders.ratio(input_folder, output=output_folder, seed=42, ratio=(0.8, 0.2))
 print("데이터 분할 완료")
 
 # GPU 사용 가능 여부 확인 (코랩에서는 런타임 유형을 T4 GPU로 설정해야함!)
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-# GPU가 있으면 쓰고, 맥북(M칩)이면 mps를 쓰고, 둘 다 없으면 cpu를 쓴다.
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
 elif torch.backends.mps.is_available():
@@ -46,14 +63,23 @@ print(f"현재 사용하는 디바이스: {device}")
 # 데이터 전처리 및 로더 준비
 
 # 1. 이미지 전처리 규칙 설정
+# [수정] pad_to_square를 Resize 앞에 추가 (train/val 둘 다 동일하게 적용)
+#   - train 쪽 증강은 대폭 강화된 상태 유지
+#     (유리병/페트병처럼 시각적으로 유사한 재질을 구분하려면,
+#      다양한 각도/조명/구도에서도 같은 재질로 인식하도록 훈련시켜야 함)
+#   - val 쪽은 패딩 외에 다른 증강 없음 (평가는 항상 "있는 그대로"로 해야 정확함)
 data_transforms = {
     'train': transforms.Compose([
-        transforms.Resize((224, 224)), # MobileNet의 적정 사이즈로 통일
-        transforms.RandomHorizontalFlip(), # 데이터 증강: 사진 좌우 반전
-        transforms.ToTensor(), # 이미지를 파이토치 텐서(숫자 배열)로 변환
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]) # ImageNet 표준 색상 정규화
+        transforms.Lambda(pad_to_square),                      # [신규] 비율 왜곡 방지
+        transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),  # 확대/축소 + 크롭 (구도 다양화)
+        transforms.RandomHorizontalFlip(),                      # 좌우 반전
+        transforms.RandomRotation(20),                          # 회전 (촬영 각도 다양화)
+        transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.3),  # 조명/색감 다양화
+        transforms.ToTensor(),
+        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
     'val': transforms.Compose([
+        transforms.Lambda(pad_to_square),                      # [신규] 비율 왜곡 방지
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -61,8 +87,6 @@ data_transforms = {
 }
 
 # 2. 데이터 폴더 경로 설정
-# 폴더 구조는 data_dir/train/페트병, data_dir/train/캔, data_dir/train/종이팩, data_dir/train/유리병
-# data_dir = './dataset' 
 data_dir = output_folder
 
 # 3. 데이터셋 불러오기
@@ -83,15 +107,17 @@ print(f"우리가 분류할 클래스들: {class_names}")
 # 1. 사전 학습된 MobileNet V2 모델 불러오기
 model = models.mobilenet_v2(weights='IMAGENET1K_V1')
 
-# 2. 가중치 동결 (Feature Extractor 방식: 기존 지식은 잊어버리지 않게 얼려둠)
+# 2. 파인튜닝: 전체 레이어를 학습 가능하게 풀어줌
+#   - Feature Extractor 방식(마지막 레이어만 학습)은 사전학습된 특징을 그대로 쓰기 때문에,
+#     유리병 vs 페트병처럼 미세한 질감 차이를 구분하는 데 한계가 있었음
+#   - 전체를 풀어서 재학습하면, 하위 레이어까지 우리 데이터에 맞게 조정됨
 for param in model.parameters():
-    param.requires_grad = False
+    param.requires_grad = True
 
 # 3. 마지막 출력층(Classifier) 수정하기
 # 우리의 클래스 개수 (페트병, 캔, 종이, 유리병 = 총 4개)
-num_classes = len(class_names) 
+num_classes = len(class_names)
 
-# MobileNetV2의 classifier[1]이 원래 1000개를 분류하던 것을 4개로 수정
 num_ftrs = model.classifier[1].in_features
 model.classifier[1] = nn.Linear(num_ftrs, num_classes)
 
@@ -101,10 +127,9 @@ model = model.to(device)
 # 4. 오차 함수(Loss)와 최적화 도구(Optimizer) 설정
 criterion = nn.CrossEntropyLoss()
 
-# 모델 전체가 아니라, 우리가 방금 바꾼 마지막 층(classifier[1])만 학습시킴.
-optimizer = optim.Adam(model.classifier[1].parameters(), lr=0.0001)
-# 파인 튜닝 후 아래 코드 사용
-# optimizer = optim.Adam(model.parameters(), lr=0.0001)
+# 파인튜닝이므로 전체 파라미터를 학습 대상으로 하되,
+#   이미 학습된 특징이 무너지지 않도록 학습률을 훨씬 낮춤 (0.0001 -> 0.00001)
+optimizer = optim.Adam(model.parameters(), lr=0.00001)
 
 
 # 학습 루프 함수 및 실행
@@ -128,7 +153,6 @@ def train_model(model, criterion, optimizer, num_epochs=50):
             running_loss = 0.0
             running_corrects = 0
 
-            # F1-score 계산을 위해 예측값/정답값을 에폭 단위로 모아둠
             all_preds = []
             all_labels = []
 
@@ -150,14 +174,11 @@ def train_model(model, criterion, optimizer, num_epochs=50):
                 running_loss += loss.item() * inputs.size(0)
                 running_corrects += torch.sum(preds == labels.data)
 
-                # 배치마다 예측값/정답값을 CPU로 옮겨서 리스트에 누적
                 all_preds.extend(preds.cpu().numpy())
                 all_labels.extend(labels.cpu().numpy())
 
             epoch_loss = running_loss / dataset_sizes[phase]
             epoch_acc = running_corrects.float() / dataset_sizes[phase]
-
-            # 에폭 전체 예측 결과로 F1-score 계산 (클래스별 균형을 고려한 macro 평균)
             epoch_f1 = f1_score(all_labels, all_preds, average='macro')
 
             print(f'{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f} F1: {epoch_f1:.4f}')
@@ -175,11 +196,13 @@ def train_model(model, criterion, optimizer, num_epochs=50):
     model.load_state_dict(best_model_wts)
     return model
 
-# 위 함수를 이용해 실제로 학습을 시작
-model_ft = train_model(model, criterion, optimizer, num_epochs=100)
+
+# 파인튜닝은 처음부터 많은 에폭까지 필요 없음.
+#   이미 어느 정도 학습된 특징을 "미세 조정"하는 것이므로 적은 에폭으로 충분하고,
+#   너무 많이 돌리면 오히려 소량 데이터(200장)에 과적합될 위험이 커짐
+model_ft = train_model(model, criterion, optimizer, num_epochs=20)
 
 # 최고 성능의 모델을 파일로 저장
-# 모델 가중치와 클래스 이름을 모두 저장하기
 torch.save({
     "model_state_dict": model_ft.state_dict(),
     "classes": class_names,
