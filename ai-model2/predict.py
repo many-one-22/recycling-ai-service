@@ -105,8 +105,7 @@ if __name__ == "__main__":
     # 테스트해보고 싶은 이미지 파일 경로를 넣기
     # [참고] 이제 pad_to_square가 자동으로 적용되므로, 미리 패딩한 파일을 안 넣어도 됨
     #        (glass4-2_padded_gray.jpg 대신 원본 glass4-2.jpg를 그대로 넣으면 됨)
-    TEST_IMAGE_PATH = 'dataset_new/paper/paper4-2.jpg'
-
+    TEST_IMAGE_PATH = 'dataset_new_new/pet/7.jpg'
     if os.path.exists(MODEL_PATH) and os.path.exists(TEST_IMAGE_PATH):
         # 모델 로드
         model, class_names = load_model(MODEL_PATH)
