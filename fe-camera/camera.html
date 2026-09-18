@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>클래시파이 - 촬영</title>
+  <link rel="stylesheet" href="camera.css">
+  <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+<body>
+
+  <div class="mobile-container">
+    <!-- 1. 상단 유틸리티 바 (뒤로가기) -->
+    <header class="camera-header">
+      <button class="icon-btn" id="btnBack" type="button" aria-label="뒤로가기">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </button>
+    </header>
+
+    <!-- 2. 중앙 뷰파인더 영역 -->
+    <main class="viewfinder-box">
+      <!-- 실제 카메라 비디오 스트림 -->
+      <video id="cameraVideo" autoplay playsinline muted></video>
+
+      <!-- 사진 캡처용 숨김 캔버스 -->
+      <canvas id="captureCanvas" style="display: none;"></canvas>
+
+      <!-- 상단 안내 가이드 멘트 -->
+      <div class="viewfinder-guide-message">물체를 사각형 가이드 안에 맞추고 촬영해주세요.</div>
+
+      <!-- 외곽 4개 코너 브래킷 -->
+      <span class="corner corner-tl"></span>
+      <span class="corner corner-tr"></span>
+      <span class="corner corner-bl"></span>
+      <span class="corner corner-br"></span>
+
+      <!-- 중앙 타겟 포커스 가이드 박스 -->
+      <div class="target-focus-box">
+        <span class="target-corner t-tl"></span>
+        <span class="target-corner t-tr"></span>
+        <span class="target-corner t-bl"></span>
+        <span class="target-corner t-br"></span>
+        <div class="target-crosshair"></div>
+      </div>
+    </main>
+
+    <!-- 3. 하단 컨트롤 영역 -->
+    <footer class="camera-footer">
+      <div class="controls-row">
+        <!-- 갤러리 업로드 숨김 인풋 및 버튼 -->
+        <input type="file" id="galleryInput" accept="image/*" style="display: none;">
+        <button class="action-btn gallery-btn" id="btnGallery" type="button" aria-label="갤러리에서 선택">
+          <ion-icon name="images-outline"></ion-icon>
+        </button>
+
+        <!-- 메인 촬영 셔터 버튼 -->
+        <button class="shutter-button" id="btnShutter" type="button" aria-label="사진 촬영">
+          <div class="shutter-core"></div>
+        </button>
+
+        <!-- 카메라 전/후면 전환 버튼 -->
+        <button class="action-btn switch-btn" id="btnSwitch" type="button" aria-label="카메라 전후면 전환">
+          <ion-icon name="camera-reverse-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- 셔터 안내 문구 -->
+      <p class="shutter-caption">탭하여 폐기물 분석하기</p>
+    </footer>
+  </div>
+
+  <script src="camera.js"></script>
+</body>
+</html>
