@@ -1,11 +1,13 @@
 # 데이터 (용량 크므로 git에 올리지 않음, Google Drive로 공유)
 data/raw/
 data/processed/
+data/processed_200/
 dataset/
 *.zip
 *.tar
 *.zip.part*
 *.jpg
+*.heic
  
 # 학습된 모델 체크포인트
 checkpoints/

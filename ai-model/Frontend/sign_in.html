@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>로그인</title>
+    <link rel='stylesheet' href='style_sign_in.css'>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="main-container">
+
+        <header>
+            <button type="button" class="btn-back" onclick="history.back()">〈</button>
+        </header>
+
+        <div class="background-image">
+            <img src="giant_tree.svg" alt="Background Image">
+        </div>
+        
+        <div class="main">
+            <div class="logo-container">
+                <div class="logo-name">클래시파이</div>
+            </div>
+
+            <p class="signup-desc">클래시파이 서비스에 오신 것을 환영합니다! <br>구글 계정으로 간편하게 시작하세요.</p>
+
+            <div id="g_id_onload"
+                 data-client_id="172339746930-7bfqmf7ahj79cvhdmomativigmqsagmi.apps.googleusercontent.com"
+                 data-callback="handleGoogleLogin"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-size="large"
+                 data-theme="outline"
+                 data-text="signin_with"
+                 data-shape="rectangular"
+                 data-logo_alignment="left"
+                 data-width="250"
+                 data-height="100">
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function handleGoogleLogin(response) {
+            fetch('http://localhost:8080/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential })
+            })
+            .then(res => res.json())
+            .then(data => {
+                localStorage.setItem('access_token', data.access_token);
+                alert('환영합니다, ' + data.user.name + '님!');
+                window.location.href = '/dashboard.html';
+            })
+            .catch(err => {
+                console.error('로그인 실패:', err);
+                alert('로그인에 실패했습니다.');
+            });
+        }
+    </script>
+</body>
+</html>

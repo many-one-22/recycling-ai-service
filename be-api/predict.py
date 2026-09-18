@@ -1,6 +1,10 @@
 import os
+import sys
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'be-db'))
+from db import get_guide  # be-db/db.py의 get_guide 함수 임포트
 
 app = Flask(__name__)
 app.json.ensure_ascii = False #한글
@@ -31,16 +35,20 @@ def predict():
         file.save(save_path)  #이미지 서버에 저장
         filename_result = file.filename
 
-    #DB 조회 함수 위치
+    target_category = "페트병" #추후 AI 모델 예측값
+
+    disposal_guide = get_guide(target_category)
+    if not disposal_guide:
+         disposal_guide = "깨끗이 씻어서 재질별로 배출해 주세요."
 
     response_data = {
         "status": "success",
         "saved_filename": filename_result,
         #응답 예시
         "prediction": {
-            "category": "유리병",
-            "item_name": "투명 유리병",
-            "disposal_method": "깨끗한 유리병은 유리병 수거함으로 배출합니다."
+            "category": target_category,
+            "item_name": target_category,
+            "disposal_method": disposal_guide
         }
     }
 
