@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>마이페이지</title>
+    <link rel='stylesheet' href='style_my_page.css'>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+    <div class="main-container">
+        <header>
+            <button type="button" class="btn-back" onclick="history.back()">〈</button>
+            <h2 class="title">마이페이지</h2>
+        </header>
+
+        <div class="content">
+            <section class="stat-card">
+                <p class="stat-label">재활용한 쓰레기 개수</p>
+                <p class="stat-value"><span id="recycleCount">0</span>개</p>
+            </section>
+
+            <section class="menu-list">
+                <div class="menu-item">
+                    <span class="menu-text">알림 켜기/끄기</span>
+                    <label class="switch">
+                        <input type="checkbox" id="notifyToggle" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <button type="button" class="menu-item menu-button" id="logoutBtn">
+                    <span class="menu-text">로그아웃</span>
+                    <span class="menu-arrow">〉</span>
+                </button>
+
+                <button type="button" class="menu-item menu-button danger" id="withdrawBtn">
+                    <span class="menu-text">회원탈퇴</span>
+                    <span class="menu-arrow">〉</span>
+                </button>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/user/recycle-count')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('recycleCount').textContent = data.count;
+            })
+            .catch(err => console.error('재활용 개수 불러오기 실패:', err));
+
+        document.getElementById('notifyToggle').addEventListener('change', (e) => {
+            const enabled = e.target.checked;
+            fetch('/api/user/notify', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled })
+            }).catch(err => console.error('알림 설정 실패:', err));
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (!confirm('로그아웃 하시겠습니까?')) return;
+            localStorage.removeItem('access_token');
+            window.location.href = '/sign_in.html';
+        });
+
+        document.getElementById('withdrawBtn').addEventListener('click', () => {
+            if (!confirm('정말 회원탈퇴 하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+            fetch('/api/user/withdraw', {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('탈퇴 실패');
+                localStorage.removeItem('access_token');
+                alert('회원탈퇴가 완료되었습니다.');
+                window.location.href = '/sign_up.html';
+            })
+            .catch(err => {
+                console.error(err);
+                alert('회원탈퇴 중 오류가 발생했습니다.');
+            });
+        });
+    </script>
+</body>
+</html>
