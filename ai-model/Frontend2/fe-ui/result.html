@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>분석 결과 | 클래시파이</title>
+  <link rel="stylesheet" href="result.css">
+</head>
+<body>
+  <div class="wrap">
+    <!-- 상단 헤더 -->
+    <header class="top-nav">
+      <button type="button" class="btn-back" onclick="history.back()">〈</button>
+      <h2>분석 결과</h2>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="main-content">
+      <!-- 대형 와이드 이미지 카드 영역 -->
+      <div class="hero-image-card">
+        <div class="img-preview" id="imgBox">
+          <span class="img-text">촬영된 사진 영역</span>
+        </div>
+
+        <!-- 이미지 내부 글래스모피즘 오버레이 뱃지 -->
+        <div class="overlay-badge-row">
+          <div class="glass-chip ai-confidence">
+            <span>AI 판독 일치율 <strong>95.4%</strong></span>
+          </div>
+          <div class="glass-chip eco-point">
+            <span>🌱 +10P</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결과 타이틀 및 요약 -->
+      <div class="result-headline">
+        <span class="category-pill" id="resCategory">투명 페트병</span>
+        <h3 id="resTitle">페트병으로 분류돼요</h3>
+        <p class="headline-desc">라벨과 뚜껑을 분리한 뒤 압착해서 버려주세요</p>
+      </div>
+
+      <!-- 인터랙티브 분리배출 가이드 카드 -->
+      <section class="guide-card">
+        <div class="guide-header">
+          <h4>올바른 배출 방법</h4>
+          <span class="guide-hint">터치해서 실천 완료</span>
+        </div>
+
+        <ul id="guideList" class="guide-list">
+          <li class="check-item" onclick="toggleCheck(this)">
+            <span class="check-circle"></span>
+            <span class="guide-desc">내용물을 비우고 물로 깨끗이 헹궈주세요</span>
+          </li>
+          <li class="check-item" onclick="toggleCheck(this)">
+            <span class="check-circle"></span>
+            <span class="guide-desc">비닐 라벨을 뜯어서 비닐류에 따로 배출하세요</span>
+          </li>
+          <li class="check-item" onclick="toggleCheck(this)">
+            <span class="check-circle"></span>
+            <span class="guide-desc">부피를 줄이도록 압착 후 전용 수거함에 배출하세요</span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 결과 오류 피드백 텍스트 -->
+      <div class="feedback-area">
+        <span>혹시 다른 쓰레기인가요?</span>
+        <button type="button" class="btn-feedback" onclick="openFeedbackModal()">결과 수정 제보</button>
+      </div>
+    </main>
+
+    <!-- 하단 고정 버튼 영역 -->
+    <footer class="bottom-btns">
+      <a href="../fe-camera/camera.html" class="btn btn-secondary">다시 촬영</a>
+      <a href="index.html" class="btn btn-primary">홈으로</a>
+    </footer>
+
+    <!-- 피드백 모달 창 -->
+    <div class="modal-overlay" id="feedbackModal">
+      <div class="modal-content">
+        <h4>올바른 품목을 알려주세요</h4>
+        <p class="modal-sub">AI 모델 성능 개선을 위한 데이터로 반영됩니다</p>
+        
+        <div class="feedback-options">
+          <button type="button" class="opt-btn" onclick="submitFeedback('유리병')">유리병</button>
+          <button type="button" class="opt-btn" onclick="submitFeedback('캔류')">캔류</button>
+          <button type="button" class="opt-btn" onclick="submitFeedback('종이')">종이</button>
+          <button type="button" class="opt-btn" onclick="submitFeedback('비닐')">비닐</button>
+          <button type="button" class="opt-btn" onclick="submitFeedback('일반쓰레기')">일반쓰레기</button>
+        </div>
+
+        <button type="button" class="modal-close" onclick="closeFeedbackModal()">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="result.js"></script>
+</body>
+</html>
