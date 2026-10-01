@@ -75,7 +75,10 @@ predict_transform = transforms.Compose([
 # -------------------------------------------------------------
 def predict_image(image_path, model, class_names):
     # 이미지 파일 열기
-    image = Image.open(image_path).convert('RGB')
+    if isinstance(image_path, Image.Image):
+        image = image_path.convert('RGB')
+    else:
+        image = Image.open(image_path).convert('RGB')
 
     # 전처리 적용 및 모델에 넣기 위한 차원 맞춰주기 (1, C, H, W)
     input_tensor = predict_transform(image).unsqueeze(0).to(device)
