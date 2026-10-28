@@ -6,6 +6,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
+from recycling_api_routes import router as recycling_router
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
@@ -15,11 +16,11 @@ if BASE_DIR not in sys.path:
 db_module = importlib.import_module("be-db.db")
 get_guide = db_module.get_guide
 
-# [수정] predict.py가 be-api 폴더로 이동해서 postEx.py와 같은 폴더가 됨 -> 직접 import
 import predict as predict_module
 predict = predict_module.predict
 
 app = FastAPI()
+app.include_router(recycling_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,7 +41,7 @@ CAM_DIR = os.path.join(BASE_DIR, "ai-model/Frontend2/fe-camera")
 if os.path.exists(CAM_DIR):
     app.mount("/fe-camera", StaticFiles(directory=CAM_DIR), name="fe-camera")
 
-# [수정] 실제 체크포인트 파일 위치(be-api 폴더)로 변경
+# be-api 폴더
 CHECKPOINT_PATH = os.path.join(BASE_DIR, "be-api", "best_recycling_model.pth")
 
 # 홈 화면 연결 (/)
@@ -58,7 +59,7 @@ async def serve_style():
 async def serve_result():
     return FileResponse(os.path.join(UI_DIR, "result.html"))
 
-# 카메라 화면 연결 (/camera -> fe-camera 내부 상대경로 유지를 위해 리다이렉트)
+# 카메라 화면 연결
 @app.get("/camera")
 async def serve_camera():
     return RedirectResponse(url="/fe-camera/camera.html")
