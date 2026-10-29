@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관리자 페이지 | 클래시파이</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<header><h1>클래시파이 관리자</h1></header>
+<main>
+  <div id="msg"></div>
+
+  <div class="summary">
+    <div class="stat"><div class="label">전체 사용자</div><div class="value" id="statUsers">-</div></div>
+    <div class="stat"><div class="label">누적 재활용 개수</div><div class="value" id="statCount">-</div></div>
+    <div class="stat"><div class="label">대기중 제보</div><div class="value" id="statWait">-</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabUsers" type="button">사용자</button>
+    <button class="tab" id="tabReports" type="button">오류 제보</button>
+    <button class="refresh" id="btnRefresh" type="button">새로고침</button>
+  </div>
+
+  <div class="card" id="panelUsers">
+    <table>
+      <thead><tr><th>ID</th><th>이메일</th><th class="num">재활용 개수</th><th>가입일</th></tr></thead>
+      <tbody id="usersBody"></tbody>
+    </table>
+  </div>
+
+  <div class="card hidden" id="panelReports">
+    <table>
+      <thead><tr><th>ID</th><th>작성자</th><th>내용</th><th>상태</th><th>접수일</th></tr></thead>
+      <tbody id="reportsBody"></tbody>
+    </table>
+  </div>
+</main>
+<div id="toast"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
