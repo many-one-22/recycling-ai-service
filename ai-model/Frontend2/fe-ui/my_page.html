@@ -43,18 +43,37 @@
     </div>
 
     <script>
-        fetch('/api/user/recycle-count')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('recycleCount').textContent = data.count;
+        const TOKEN = localStorage.getItem('access_token');
+
+        // 로그인 안 한 상태로 들어오면 로그인 화면으로 보냄
+        if (!TOKEN) {
+            alert('로그인이 필요합니다.');
+            window.location.href = '/fe-ui/sign_in.html';
+        }
+
+        const authHeaders = { 'Authorization': 'Bearer ' + TOKEN };
+
+        fetch('/api/user/me', { headers: authHeaders })
+            .then(res => {
+                if (res.status === 401) {
+                    localStorage.removeItem('access_token');
+                    window.location.href = '/fe-ui/sign_in.html';
+                    return null;
+                }
+                return res.json();
             })
-            .catch(err => console.error('재활용 개수 불러오기 실패:', err));
+            .then(data => {
+                if (!data) return;
+                document.getElementById('recycleCount').textContent = data.recycled_count;
+                document.getElementById('notifyToggle').checked = data.notify_enabled;
+            })
+            .catch(err => console.error('사용자 정보 불러오기 실패:', err));
 
         document.getElementById('notifyToggle').addEventListener('change', (e) => {
             const enabled = e.target.checked;
             fetch('/api/user/notify', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
                 body: JSON.stringify({ enabled })
             }).catch(err => console.error('알림 설정 실패:', err));
         });
@@ -62,20 +81,20 @@
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if (!confirm('로그아웃 하시겠습니까?')) return;
             localStorage.removeItem('access_token');
-            window.location.href = '/sign_in.html';
+            window.location.href = '/fe-ui/sign_in.html';
         });
 
         document.getElementById('withdrawBtn').addEventListener('click', () => {
             if (!confirm('정말 회원탈퇴 하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
             fetch('/api/user/withdraw', {
                 method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') }
+                headers: { ...authHeaders }
             })
             .then(res => {
                 if (!res.ok) throw new Error('탈퇴 실패');
                 localStorage.removeItem('access_token');
                 alert('회원탈퇴가 완료되었습니다.');
-                window.location.href = '/sign_up.html';
+                window.location.href = '/fe-ui/sign_in.html';
             })
             .catch(err => {
                 console.error(err);

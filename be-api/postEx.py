@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
 from recycling_api_routes import router as recycling_router
+from auth import router as auth_router
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
@@ -20,6 +21,7 @@ import predict as predict_module
 predict = predict_module.predict
 
 app = FastAPI()
+app.include_router(auth_router)
 app.include_router(recycling_router)
 
 app.add_middleware(
