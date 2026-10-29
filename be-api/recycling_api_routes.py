@@ -22,12 +22,9 @@ spec.loader.exec_module(db)
 router = APIRouter()
 
 
-def current_user():
-    """Replace with verified Google-login session/token lookup.
-
-    Never trust an email or user_id provided directly by the client.
-    """
-    raise HTTPException(status_code=503, detail='로그인 인증 연결이 아직 설정되지 않았습니다.')
+# 실제 구글 로그인 인증(auth.py)과 연결됨.
+# Authorization: Bearer <토큰> 헤더를 검증해서 사용자 정보를 돌려준다.
+from auth import current_user
 
 
 def admin_user(user: Annotated[dict, Depends(current_user)]):
