@@ -5,8 +5,10 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: -apple-system, "Malgun Gothic", sans-serif; background: var(--bg); color: var(--text); }
 header { background: var(--green); color: #fff; padding: 16px 20px; }
+header .back-link { display: inline-block; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; margin-bottom: 6px; }
+header .back-link:hover { color: #fff; }
 header h1 { margin: 0; font-size: 18px; }
-main { max-width: 900px; margin: 0 auto; padding: 16px; }
+main { width: 100%; flex: 1; padding: 16px; overflow-y: auto; }
 
 .summary { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .stat { flex: 1; min-width: 140px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
@@ -35,3 +37,41 @@ select.s-done { background: var(--green-soft); color: var(--green); }
 #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #222; color: #fff;
          padding: 10px 16px; border-radius: 10px; font-size: 14px; display: none; }
 .hidden { display: none; }
+
+/* ---- 모바일 프레임(420px)에 맞춘 조정 ---- */
+.admin-frame {
+  background-color: #f6f8f7;
+}
+
+/* 통계 3개를 가로로 욱여넣으면 글자가 깨져서 한 줄에 하나씩 */
+.admin-frame .summary {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-frame .stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.admin-frame .stat .value {
+  margin-top: 0;
+  font-size: 20px;
+}
+
+/* 표는 좁은 화면에서 가로로만 스크롤되게 (세로 레이아웃은 안 깨짐) */
+.admin-frame .card {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-frame table {
+  min-width: 480px;
+  font-size: 13px;
+}
+
+.admin-frame .tabs {
+  flex-wrap: wrap;
+}

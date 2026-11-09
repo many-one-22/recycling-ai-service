@@ -60,6 +60,20 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id)
         )''')
+
+        # 환경 퀴즈 풀이 기록 (문항 자체는 be-db/quiz.db에 있음)
+        # UNIQUE(user_id, quiz_date) 로 하루에 한 번만 기록되게 막는다.
+        cursor.execute('''CREATE TABLE IF NOT EXISTS quiz_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            quiz_date TEXT NOT NULL,
+            question_id INTEGER NOT NULL,
+            choice TEXT NOT NULL,
+            is_correct INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (user_id, quiz_date),
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )''')
         conn.commit()
 
         # 관리자로 쓸 구글 계정 (이 이메일로 로그인하면 관리자 권한)
@@ -163,6 +177,7 @@ def delete_user(user_id: int) -> bool:
         cursor = conn.cursor()
         cursor.execute("DELETE FROM recycle_logs WHERE user_id = ?", (user_id,))
         cursor.execute("DELETE FROM reports WHERE user_id = ?", (user_id,))
+        cursor.execute("DELETE FROM quiz_logs WHERE user_id = ?", (user_id,))
         cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
         deleted = cursor.rowcount > 0
         conn.commit()

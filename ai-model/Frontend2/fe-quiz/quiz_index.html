@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘의 환경 퀴즈</title>
+  <link rel="stylesheet" href="/fe-quiz/quiz_style.css">
+  <link rel="stylesheet" href="/fe-ui/nav.css">
+    <link rel="stylesheet" href="/fe-ui/frame.css">
+</head>
+<body>
+  <div class="mobile-container app-frame">
+
+    <!-- 상단 헤더 -->
+    <header class="quiz-header">
+      <button type="button" class="btn-back" onclick="goHome()" aria-label="뒤로가기">‹</button>
+      <h1 class="header-title">오늘의 환경 퀴즈</h1>
+      <span class="header-spacer"></span>
+    </header>
+
+    <main class="quiz-body">
+
+      <!-- 로딩 -->
+      <div class="state" id="stateLoading">
+        <div class="spinner"></div>
+        <p class="state-text">문제를 불러오는 중…</p>
+      </div>
+
+      <!-- 오류 -->
+      <div class="state" id="stateError" hidden>
+        <p class="state-emoji">😵</p>
+        <p class="state-text" id="errorText">문제를 불러오지 못했어요.</p>
+        <button type="button" class="btn btn-ghost" onclick="location.reload()">다시 시도</button>
+      </div>
+
+      <!-- 문제 -->
+      <section class="quiz-card" id="quizCard" hidden>
+        <div class="card-top">
+          <span class="date-text" id="dateText">—</span>
+          <span class="field-badge" id="fieldBadge">분야</span>
+        </div>
+
+        <p class="question-text" id="questionText">—</p>
+
+        <!-- O / X 버튼 -->
+        <div class="ox-buttons" id="oxButtons">
+          <button type="button" class="ox-btn ox-o" data-choice="O" aria-label="맞다">
+            <span class="ox-mark">O</span>
+            <span class="ox-label">맞다</span>
+          </button>
+          <button type="button" class="ox-btn ox-x" data-choice="X" aria-label="아니다">
+            <span class="ox-mark">X</span>
+            <span class="ox-label">아니다</span>
+          </button>
+        </div>
+
+        <!-- 채점 결과 -->
+        <div class="result-box" id="resultBox" hidden>
+          <p class="result-verdict" id="resultVerdict">정답이에요!</p>
+          <p class="result-answer" id="resultAnswer">정답: O</p>
+          <p class="result-explanation" id="resultExplanation">해설</p>
+        </div>
+
+        <!-- 안내 문구 -->
+        <p class="notice" id="noticeText" hidden></p>
+
+        <!-- 하단 버튼 -->
+        <div class="card-actions" id="cardActions" hidden>
+          <a href="/fe-ui/index.html" class="btn btn-primary">홈으로</a>
+        </div>
+      </section>
+
+      <!-- 내 누적 성적 (로그인 시) -->
+      <section class="stats-card" id="statsCard" hidden>
+        <h2 class="stats-title">내 퀴즈 기록</h2>
+        <div class="stats-row">
+          <div class="stat">
+            <span class="stat-value" id="statSolved">0</span>
+            <span class="stat-label">푼 문제</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statCorrect">0</span>
+            <span class="stat-label">맞힌 문제</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statAccuracy">0%</span>
+            <span class="stat-label">정답률</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="statStreak">0</span>
+            <span class="stat-label">연속 참여</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 비로그인 안내 -->
+      <p class="login-hint" id="loginHint" hidden>
+        <a href="/fe-ui/sign_in.html">로그인</a>하면 푼 기록과 정답률이 저장돼요.
+      </p>
+
+    </main>
+
+    <!-- 하단 내비게이션 바 (nav.js 가 그려줌) -->
+    <div id="bottomNav"></div>
+  </div>
+
+  <script src="/fe-ui/nav.js"></script>
+  <script src="/fe-quiz/quiz_script.js"></script>
+</body>
+</html>
