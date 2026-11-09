@@ -1,0 +1,318 @@
+/* 환경 퀴즈 화면 — fe-ui/style.css 의 색감(#f4f8f5, #559c79)을 그대로 따른다 */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Noto Sans KR", sans-serif;
+}
+
+body {
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* display 속성을 지정한 요소는 hidden 속성이 무시되므로 명시적으로 숨긴다 */
+[hidden] {
+  display: none !important;
+}
+
+.mobile-container {
+  width: 100%;
+  background-color: #f4f8f5;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---------- 헤더 ---------- */
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 8px;
+  flex-shrink: 0;
+  background-color: #f4f8f5;
+}
+
+.btn-back,
+.header-spacer {
+  width: 40px;
+  height: 40px;
+}
+
+.btn-back {
+  border: none;
+  background: none;
+  font-size: 28px;
+  line-height: 1;
+  color: #3d5c4a;
+  cursor: pointer;
+}
+
+.header-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2f4a3a;
+  letter-spacing: -0.3px;
+}
+
+/* ---------- 본문 ---------- */
+.quiz-body {
+  flex: 1;
+  padding: 8px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 로딩 / 오류 */
+.state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 0;
+}
+
+.state-emoji { font-size: 40px; }
+
+.state-text {
+  font-size: 14px;
+  color: #6b7f72;
+}
+
+.spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid #d7e6dd;
+  border-top-color: #559c79;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 문제 카드 ---------- */
+.quiz-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 22px 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.date-text {
+  font-size: 12px;
+  color: #93a69a;
+  font-weight: 500;
+}
+
+.field-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #4a8264;
+  background-color: #e3efe8;
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+.question-text {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: #22322a;
+  letter-spacing: -0.3px;
+  word-break: keep-all;
+  margin-bottom: 22px;
+}
+
+/* ---------- O / X 버튼 ---------- */
+.ox-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.ox-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 20px 0;
+  border-radius: 16px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.12s ease, opacity 0.2s ease;
+}
+
+.ox-btn:active { transform: scale(0.97); }
+
+.ox-o { background-color: #e6f3ec; border-color: #b9ddc9; }
+.ox-x { background-color: #fdeced; border-color: #f3c3c7; }
+
+.ox-mark {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.ox-o .ox-mark { color: #3f9168; }
+.ox-x .ox-mark { color: #d4565f; }
+
+.ox-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #5c6b62;
+}
+
+/* 제출 후: 고른 것만 남기고 나머지는 흐리게 */
+.ox-btn:disabled { cursor: default; }
+.ox-btn.dimmed { opacity: 0.35; }
+.ox-btn.chosen { box-shadow: 0 0 0 3px rgba(85, 156, 121, 0.25); }
+
+/* ---------- 채점 결과 ---------- */
+.result-box {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background-color: #f4f8f5;
+  border-left: 4px solid #559c79;
+}
+
+.result-box.wrong { border-left-color: #d4565f; }
+
+.result-verdict {
+  font-size: 16px;
+  font-weight: 800;
+  color: #3f9168;
+  margin-bottom: 4px;
+}
+
+.result-box.wrong .result-verdict { color: #d4565f; }
+
+.result-answer {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7f72;
+  margin-bottom: 8px;
+}
+
+.result-explanation {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #3c4c43;
+  word-break: keep-all;
+}
+
+.notice {
+  margin-top: 14px;
+  font-size: 13px;
+  color: #93a69a;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.card-actions {
+  margin-top: 18px;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: #559c79;
+  color: #ffffff;
+}
+
+.btn-ghost {
+  width: auto;
+  padding: 10px 22px;
+  background-color: #ffffff;
+  color: #4a8264;
+  border: 1px solid #c9ded3;
+}
+
+/* ---------- 내 기록 ---------- */
+.stats-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  padding: 18px 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stats-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2f4a3a;
+  margin-bottom: 14px;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: #3f9168;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #93a69a;
+}
+
+.login-hint {
+  font-size: 13px;
+  color: #93a69a;
+  text-align: center;
+  padding: 4px 0;
+}
+
+.login-hint a {
+  color: #559c79;
+  font-weight: 700;
+}
+
+/* ---------- 하단 내비게이션 ---------- */
+
+
+
+
+
+

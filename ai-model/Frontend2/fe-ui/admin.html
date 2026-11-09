@@ -4,10 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>관리자 페이지 | 클래시파이</title>
-<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="/fe-ui/admin.css">
+<link rel="stylesheet" href="/fe-ui/nav.css">
+<link rel="stylesheet" href="/fe-ui/frame.css">
 </head>
 <body>
-<header><h1>클래시파이 관리자</h1></header>
+<div class="app-frame admin-frame">
+<header>
+  <a class="back-link" href="/fe-ui/my_page.html">〈 마이페이지</a>
+  <h1>클래시파이 관리자</h1>
+</header>
 <main>
   <div id="msg"></div>
 
@@ -39,6 +45,11 @@
 </main>
 <div id="toast"></div>
 
-<script src="admin.js"></script>
+<!-- 하단 내비게이션 바 (nav.js 가 그려줌) -->
+<div id="bottomNav"></div>
+</div>
+
+<script src="/fe-ui/nav.js"></script>
+<script src="/fe-ui/admin.js"></script>
 </body>
 </html>

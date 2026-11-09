@@ -16,8 +16,6 @@ body {
 /* 모바일 뷰 컨테이너 */
 .main-container {
   width: 100%;
-  max-width: 420px;
-  min-height: 100vh;
   background-color: #f4f8f5;
   display: flex;
   flex-direction: column;

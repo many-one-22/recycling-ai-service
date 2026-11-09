@@ -4,13 +4,15 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>마이페이지</title>
-    <link rel='stylesheet' href='style_my_page.css'>
+    <link rel='stylesheet' href='/fe-ui/style_my_page.css'>
+    <link rel='stylesheet' href='/fe-ui/nav.css'>
+    <link rel="stylesheet" href="/fe-ui/frame.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <div class="main-container">
+    <div class="main-container app-frame">
         <header>
-            <button type="button" class="btn-back" onclick="history.back()">〈</button>
+            <button type="button" class="btn-back" onclick="location.href='/fe-ui/index.html'">〈</button>
             <h2 class="title">마이페이지</h2>
         </header>
 
@@ -20,7 +22,35 @@
                 <p class="stat-value"><span id="recycleCount">0</span>개</p>
             </section>
 
+            <section class="stat-card quiz-stat-card" id="quizStatCard">
+                <p class="stat-label">환경 퀴즈 기록</p>
+                <div class="quiz-stat-row">
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizCorrect">0</span>
+                        <span class="quiz-stat-label">맞힌 문제</span>
+                    </div>
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizSolved">0</span>
+                        <span class="quiz-stat-label">푼 문제</span>
+                    </div>
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizAccuracy">0%</span>
+                        <span class="quiz-stat-label">정답률</span>
+                    </div>
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizStreak">0</span>
+                        <span class="quiz-stat-label">연속 참여</span>
+                    </div>
+                </div>
+                <a class="quiz-link" href="/fe-quiz/quiz_index.html">오늘의 퀴즈 풀러 가기 〉</a>
+            </section>
+
             <section class="menu-list">
+                <a href="/fe-ui/admin.html" class="menu-item menu-admin" id="adminLink" hidden>
+                    <span class="menu-text">🛠️ 관리자 페이지</span>
+                    <span class="menu-arrow">〉</span>
+                </a>
+
                 <div class="menu-item">
                     <span class="menu-text">알림 켜기/끄기</span>
                     <label class="switch">
@@ -40,8 +70,12 @@
                 </button>
             </section>
         </div>
+
+        <!-- 하단 내비게이션 바 (nav.js 가 그려줌) -->
+        <div id="bottomNav"></div>
     </div>
 
+    <script src="/fe-ui/nav.js"></script>
     <script>
         const TOKEN = localStorage.getItem('access_token');
 
@@ -66,8 +100,25 @@
                 if (!data) return;
                 document.getElementById('recycleCount').textContent = data.recycled_count;
                 document.getElementById('notifyToggle').checked = data.notify_enabled;
+
+                // 관리자 계정일 때만 관리자 페이지 메뉴를 보여준다
+                if (data.is_admin) {
+                    document.getElementById('adminLink').hidden = false;
+                }
             })
             .catch(err => console.error('사용자 정보 불러오기 실패:', err));
+
+        // 환경 퀴즈 누적 기록
+        fetch('/api/quiz/stats', { headers: authHeaders })
+            .then(res => res.ok ? res.json() : null)
+            .then(stats => {
+                if (!stats) return;
+                document.getElementById('quizCorrect').textContent = stats.correct;
+                document.getElementById('quizSolved').textContent = stats.solved;
+                document.getElementById('quizAccuracy').textContent = stats.accuracy + '%';
+                document.getElementById('quizStreak').textContent = stats.streak;
+            })
+            .catch(err => console.error('퀴즈 기록 불러오기 실패:', err));
 
         document.getElementById('notifyToggle').addEventListener('change', (e) => {
             const enabled = e.target.checked;
