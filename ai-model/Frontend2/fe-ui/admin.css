@@ -75,3 +75,72 @@ select.s-done { background: var(--green-soft); color: var(--green); }
 .admin-frame .tabs {
   flex-wrap: wrap;
 }
+
+/* ---- 오류 제보 카드 목록 ---- */
+.chips { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.chip { border: 1px solid var(--line); background: var(--card); padding: 5px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; }
+.chip.active { background: var(--green-soft); color: var(--green); border-color: var(--green); font-weight: 600; }
+
+.report-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+.report-head { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.report-head .rid { font-weight: 700; color: var(--text); }
+.report-head .rtime { margin-left: auto; }
+.report-email { font-size: 13px; margin-bottom: 8px; word-break: break-all; }
+
+.st-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+.st-wait { background: var(--warn-soft); color: var(--warn); }
+.st-done { background: var(--green-soft); color: var(--green); }
+.st-reject { background: #fdecea; color: var(--err); }
+
+.report-body { display: flex; gap: 10px; }
+.report-photo { width: 84px; height: 84px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); background: #f0f3f1; flex-shrink: 0; }
+.report-photo.none { display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--muted); }
+.report-info { flex: 1; min-width: 0; font-size: 13px; }
+.report-info .row { margin-bottom: 4px; }
+.report-info .k { color: var(--muted); margin-right: 4px; }
+.report-text { white-space: pre-wrap; word-break: break-word; margin-top: 6px; color: var(--text); }
+
+.report-actions { display: flex; align-items: center; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); flex-wrap: wrap; }
+.report-actions .lbl { font-size: 12px; color: var(--muted); }
+.btn { border: 1px solid var(--line); background: var(--card); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn-ok { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-no { color: var(--err); border-color: var(--err); }
+
+/* ---- 사용자 카드 ---- */
+.user-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+.user-card.banned { background: #fff8f7; border-color: #f1c9c5; }
+.user-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.user-head .uid { font-size: 12px; color: var(--muted); font-weight: 700; }
+.user-head .uemail { font-size: 14px; font-weight: 600; word-break: break-all; }
+.user-meta { margin-top: 6px; font-size: 12px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.user-meta strong { color: var(--text); }
+.ban-reason { margin-top: 6px; font-size: 12px; color: var(--err); word-break: break-word; }
+.user-actions { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ban-form { display: none; width: 100%; gap: 6px; margin-top: 4px; }
+.ban-form.open { display: flex; }
+.ban-form input { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; }
+
+/* ---- 통계 ---- */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.kpi { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.kpi .label { font-size: 12px; color: var(--muted); }
+.kpi .value { font-size: 22px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+.chart-card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+.chart-card h3 { margin: 0 0 10px; font-size: 14px; }
+.chart-note { font-size: 13px; color: var(--muted); padding: 12px 0; text-align: center; }
+
+.chart-card svg { display: block; }
+.chart-card svg .grid { stroke: var(--line); stroke-width: 1; }
+.chart-card svg .axis { fill: var(--muted); font-size: 10px; }
+.chart-card svg .line { fill: none; stroke: var(--green); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart-card svg .dot { fill: var(--green); stroke: var(--card); stroke-width: 2; }
+.chart-card svg .hit { fill: transparent; cursor: pointer; }
+.readout { font-size: 13px; margin-top: 6px; color: var(--text); min-height: 18px; }
+
+.hbar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+.hbar .name { width: 72px; flex-shrink: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar .track { flex: 1; height: 14px; background: #f0f4f1; border-radius: 4px; overflow: hidden; }
+.hbar .fill { height: 100%; background: var(--green); border-radius: 0 4px 4px 0; min-width: 2px; }
+.hbar .val { width: 40px; text-align: right; font-variant-numeric: tabular-nums; color: var(--text); }

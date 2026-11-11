@@ -46,13 +46,21 @@
     </div>
 
     <script>
-        function handleGoogleLogin(response) {
-            fetch('http://localhost:8080/auth/google', {
+                function handleGoogleLogin(response) {
+            fetch('/auth/google', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: response.credential })
             })
-            .then(res => {
+            .then(async res => {
+                if (res.status === 403) {
+                    // 정지된 계정이면 서버가 403 과 사유(detail)를 보내줘요
+                    let detail = '';
+                    try { detail = (await res.json()).detail; } catch (e) {}
+                    const err = new Error(detail || '정지된 계정입니다.');
+                    err.banned = true;
+                    throw err;
+                }
                 if (!res.ok) throw new Error('로그인 실패');
                 return res.json();
             })
@@ -63,7 +71,11 @@
             })
             .catch(err => {
                 console.error('로그인 실패:', err);
-                alert('로그인에 실패했습니다.');
+                if (err.banned) {
+                    alert('로그인할 수 없어요.\n' + err.message + '\n문의가 필요하면 관리자에게 연락해 주세요.');
+                } else {
+                    alert('로그인에 실패했습니다.');
+                }
             });
         }
     </script>
