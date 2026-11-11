@@ -6,6 +6,10 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
+from recycling_api_routes import router as recycling_router
+from auth import router as auth_router
+from centers_api import router as centers_router
+from quiz_api import router as quiz_router
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
@@ -15,11 +19,25 @@ if BASE_DIR not in sys.path:
 db_module = importlib.import_module("be-db.db")
 get_guide = db_module.get_guide
 
-# [수정] predict.py가 be-api 폴더로 이동해서 postEx.py와 같은 폴더가 됨 -> 직접 import
 import predict as predict_module
 predict = predict_module.predict
 
+
+# 개발 중에는 브라우저가 옛날 HTML/CSS/JS를 계속 쓰는 일이 잦아서
+# 정적 파일마다 "항상 서버에 바뀐 게 있는지 물어보라"고 알려준다.
+# (파일이 그대로면 304만 오가므로 느려지지 않는다)
+class NoCacheStaticFiles(StaticFiles):
+    def file_response(self, *args, **kwargs):
+        response = super().file_response(*args, **kwargs)
+        response.headers["Cache-Control"] = "no-cache, must-revalidate"
+        return response
+
+
 app = FastAPI()
+app.include_router(auth_router)
+app.include_router(recycling_router)
+app.include_router(centers_router)
+app.include_router(quiz_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,34 +52,52 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 UI_DIR = os.path.join(BASE_DIR, "ai-model/Frontend2/fe-ui")
-app.mount("/fe-ui", StaticFiles(directory=UI_DIR), name="fe-ui")
+app.mount("/fe-ui", NoCacheStaticFiles(directory=UI_DIR), name="fe-ui")
 
 CAM_DIR = os.path.join(BASE_DIR, "ai-model/Frontend2/fe-camera")
 if os.path.exists(CAM_DIR):
-    app.mount("/fe-camera", StaticFiles(directory=CAM_DIR), name="fe-camera")
+    app.mount("/fe-camera", NoCacheStaticFiles(directory=CAM_DIR), name="fe-camera")
 
-# [수정] 실제 체크포인트 파일 위치(be-api 폴더)로 변경
+MAP_DIR = os.path.join(BASE_DIR, "ai-model/Frontend2/fe-map")
+if os.path.exists(MAP_DIR):
+    app.mount("/fe-map", NoCacheStaticFiles(directory=MAP_DIR), name="fe-map")
+
+QUIZ_DIR = os.path.join(BASE_DIR, "ai-model/Frontend2/fe-quiz")
+if os.path.exists(QUIZ_DIR):
+    app.mount("/fe-quiz", NoCacheStaticFiles(directory=QUIZ_DIR), name="fe-quiz")
+
+# be-api 폴더
 CHECKPOINT_PATH = os.path.join(BASE_DIR, "be-api", "best_recycling_model.pth")
 
 # 홈 화면 연결 (/)
 @app.get("/")
 async def serve_home():
-    return FileResponse(os.path.join(UI_DIR, "index.html"))
+    return FileResponse(os.path.join(UI_DIR, "index.html"), headers={"Cache-Control": "no-cache, must-revalidate"})
 
 # index.html의 상대경로 href="style.css" 지원용
 @app.get("/style.css")
 async def serve_style():
-    return FileResponse(os.path.join(UI_DIR, "style.css"))
+    return FileResponse(os.path.join(UI_DIR, "style.css"), headers={"Cache-Control": "no-cache, must-revalidate"})
 
 # 결과 화면 연결 (/result)
 @app.get("/result")
 async def serve_result():
-    return FileResponse(os.path.join(UI_DIR, "result.html"))
+    return FileResponse(os.path.join(UI_DIR, "result.html"), headers={"Cache-Control": "no-cache, must-revalidate"})
 
-# 카메라 화면 연결 (/camera -> fe-camera 내부 상대경로 유지를 위해 리다이렉트)
+# 카메라 화면 연결
 @app.get("/camera")
 async def serve_camera():
     return RedirectResponse(url="/fe-camera/camera.html")
+
+# 수거함 지도 화면 연결
+@app.get("/map")
+async def serve_map():
+    return RedirectResponse(url="/fe-map/map_index.html")
+
+# 환경 퀴즈 화면 연결
+@app.get("/quiz")
+async def serve_quiz():
+    return RedirectResponse(url="/fe-quiz/quiz_index.html")
 
 @app.post("/predict")
 async def predict_waste(image_file: UploadFile = File(...)):

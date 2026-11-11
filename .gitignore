@@ -1,4 +1,5 @@
 # 데이터 (용량 크므로 git에 올리지 않음, Google Drive로 공유)
+data/
 data/raw/
 data/processed/
 data/processed_200/
@@ -23,3 +24,8 @@ __pycache__/
 .DS_Store
  
  
+
+# 인증 비밀키와 로컬 DB (실제 값이므로 공유 금지)
+.env
+.env.example
+*.db

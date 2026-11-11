@@ -16,7 +16,6 @@ html, body {
 /* 모바일 전용 컨테이너 */
 .wrap {
   width: 100%;
-  max-width: 420px;
   height: 100dvh;
   margin: 0 auto;
   padding: 14px 20px 16px;

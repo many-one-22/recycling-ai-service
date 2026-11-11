@@ -1,0 +1,250 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", Roboto, "Noto Sans KR", sans-serif;
+}
+
+body {
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* 모바일 프레임 컨테이너 */
+.mobile-container {
+  width: 100%;
+  background-color: #f4f8f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 상단 로그인 상태 영역 */
+.top-bar {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 20px;
+  flex-shrink: 0;
+}
+
+.user-chip {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a8264;
+  background-color: #e3efe8;
+  padding: 6px 14px;
+  border-radius: 20px;
+  letter-spacing: -0.2px;
+}
+
+.login-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: #559c79;
+  text-decoration: none;
+  padding: 6px 4px;
+}
+
+/* 텍스트를 화면 정중앙에 배치하는 핵심 영역 */
+.main-content-wrapper {
+  flex: 1; /* 남는 공간을 모두 차지하여 수직 중앙을 맞춤 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* 요소들을 수직 가운데로 정렬 */
+  width: 100%;
+  padding: 0 24px;
+  margin-top: -30px; /* 시각적 밸런스를 위해 위로 살짝 끌어올림 */
+}
+
+/* 크기가 커진 상단 원형 로고 */
+.logo-circle {
+  width: 90px;
+  height: 90px;
+  background-color: #559c79;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 42px;
+  font-weight: 800;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 10px rgba(85, 156, 121, 0.2);
+  flex-shrink: 0;
+}
+
+/* 뱃지 스타일 앱 소개 멘트 */
+.sub-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4a8264;
+  background-color: #e3efe8;
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+
+/* 헤더 텍스트 */
+.title {
+  font-size: 34px;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+/* 설명 텍스트 */
+.description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666666;
+  text-align: center;
+}
+
+/* 핵심 기능 진입 버튼 */
+.action-buttons {
+  width: 100%;
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn {
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary {
+  background-color: #559c79;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(85, 156, 121, 0.25);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #4a8a6a;
+}
+
+.btn-secondary {
+  background-color: #ffffff;
+  color: #4a775f;
+  border: 1px solid #cce0d4;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #eef5f0;
+}
+
+.btn-icon {
+  font-size: 18px;
+}
+
+/* 하단 푸터 텍스트 */
+.footer-text {
+  font-size: 12px;
+  color: #9aa9a1;
+  letter-spacing: -0.2px;
+  margin-bottom: 24px;
+}
+
+/* 하단 내비게이션 바 */
+
+
+
+
+
+
+
+
+
+
+/* 분석 중 로딩 화면 */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(244, 248, 245, 0.94);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #3f5e4d;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.loading-overlay[hidden] {
+  display: none;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid rgba(85, 156, 121, 0.25);
+  border-top-color: #559c79;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 안내 메시지(토스트) */
+.toast {
+  position: absolute;
+  bottom: 86px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 40, 34, 0.92);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 20px;
+  z-index: 60;
+  white-space: nowrap;
+  animation: toastIn 0.2s ease;
+}
+
+.toast[hidden] {
+  display: none;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}

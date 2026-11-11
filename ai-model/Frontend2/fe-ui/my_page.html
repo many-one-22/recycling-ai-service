@@ -4,13 +4,15 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>마이페이지</title>
-    <link rel='stylesheet' href='style_my_page.css'>
+    <link rel='stylesheet' href='/fe-ui/style_my_page.css'>
+    <link rel='stylesheet' href='/fe-ui/nav.css'>
+    <link rel="stylesheet" href="/fe-ui/frame.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <div class="main-container">
+    <div class="main-container app-frame">
         <header>
-            <button type="button" class="btn-back" onclick="history.back()">〈</button>
+            <button type="button" class="btn-back" onclick="location.href='/fe-ui/index.html'">〈</button>
             <h2 class="title">마이페이지</h2>
         </header>
 
@@ -20,7 +22,35 @@
                 <p class="stat-value"><span id="recycleCount">0</span>개</p>
             </section>
 
+            <section class="stat-card quiz-stat-card" id="quizStatCard">
+                <p class="stat-label">환경 퀴즈 기록</p>
+                <div class="quiz-stat-row">
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizCorrect">0</span>
+                        <span class="quiz-stat-label">맞힌 문제</span>
+                    </div>
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizSolved">0</span>
+                        <span class="quiz-stat-label">푼 문제</span>
+                    </div>
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizAccuracy">0%</span>
+                        <span class="quiz-stat-label">정답률</span>
+                    </div>
+                    <div class="quiz-stat">
+                        <span class="quiz-stat-value" id="quizStreak">0</span>
+                        <span class="quiz-stat-label">연속 참여</span>
+                    </div>
+                </div>
+                <a class="quiz-link" href="/fe-quiz/quiz_index.html">오늘의 퀴즈 풀러 가기 〉</a>
+            </section>
+
             <section class="menu-list">
+                <a href="/fe-ui/admin.html" class="menu-item menu-admin" id="adminLink" hidden>
+                    <span class="menu-text">🛠️ 관리자 페이지</span>
+                    <span class="menu-arrow">〉</span>
+                </a>
+
                 <div class="menu-item">
                     <span class="menu-text">알림 켜기/끄기</span>
                     <label class="switch">
@@ -40,21 +70,61 @@
                 </button>
             </section>
         </div>
+
+        <!-- 하단 내비게이션 바 (nav.js 가 그려줌) -->
+        <div id="bottomNav"></div>
     </div>
 
+    <script src="/fe-ui/nav.js"></script>
     <script>
-        fetch('/api/user/recycle-count')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('recycleCount').textContent = data.count;
+        const TOKEN = localStorage.getItem('access_token');
+
+        // 로그인 안 한 상태로 들어오면 로그인 화면으로 보냄
+        if (!TOKEN) {
+            alert('로그인이 필요합니다.');
+            window.location.href = '/fe-ui/sign_in.html';
+        }
+
+        const authHeaders = { 'Authorization': 'Bearer ' + TOKEN };
+
+        fetch('/api/user/me', { headers: authHeaders })
+            .then(res => {
+                if (res.status === 401) {
+                    localStorage.removeItem('access_token');
+                    window.location.href = '/fe-ui/sign_in.html';
+                    return null;
+                }
+                return res.json();
             })
-            .catch(err => console.error('재활용 개수 불러오기 실패:', err));
+            .then(data => {
+                if (!data) return;
+                document.getElementById('recycleCount').textContent = data.recycled_count;
+                document.getElementById('notifyToggle').checked = data.notify_enabled;
+
+                // 관리자 계정일 때만 관리자 페이지 메뉴를 보여준다
+                if (data.is_admin) {
+                    document.getElementById('adminLink').hidden = false;
+                }
+            })
+            .catch(err => console.error('사용자 정보 불러오기 실패:', err));
+
+        // 환경 퀴즈 누적 기록
+        fetch('/api/quiz/stats', { headers: authHeaders })
+            .then(res => res.ok ? res.json() : null)
+            .then(stats => {
+                if (!stats) return;
+                document.getElementById('quizCorrect').textContent = stats.correct;
+                document.getElementById('quizSolved').textContent = stats.solved;
+                document.getElementById('quizAccuracy').textContent = stats.accuracy + '%';
+                document.getElementById('quizStreak').textContent = stats.streak;
+            })
+            .catch(err => console.error('퀴즈 기록 불러오기 실패:', err));
 
         document.getElementById('notifyToggle').addEventListener('change', (e) => {
             const enabled = e.target.checked;
             fetch('/api/user/notify', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...authHeaders },
                 body: JSON.stringify({ enabled })
             }).catch(err => console.error('알림 설정 실패:', err));
         });
@@ -62,20 +132,20 @@
         document.getElementById('logoutBtn').addEventListener('click', () => {
             if (!confirm('로그아웃 하시겠습니까?')) return;
             localStorage.removeItem('access_token');
-            window.location.href = '/sign_in.html';
+            window.location.href = '/fe-ui/sign_in.html';
         });
 
         document.getElementById('withdrawBtn').addEventListener('click', () => {
             if (!confirm('정말 회원탈퇴 하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
             fetch('/api/user/withdraw', {
                 method: 'DELETE',
-                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('access_token') }
+                headers: { ...authHeaders }
             })
             .then(res => {
                 if (!res.ok) throw new Error('탈퇴 실패');
                 localStorage.removeItem('access_token');
                 alert('회원탈퇴가 완료되었습니다.');
-                window.location.href = '/sign_up.html';
+                window.location.href = '/fe-ui/sign_in.html';
             })
             .catch(err => {
                 console.error(err);
