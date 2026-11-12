@@ -89,8 +89,11 @@
 
         fetch('/api/user/me', { headers: authHeaders })
             .then(res => {
-                if (res.status === 401) {
+            if (res.status === 401 || res.status === 403) {
                     localStorage.removeItem('access_token');
+                    if (res.status === 403) {
+                        alert('정지된 계정이에요. 관리자에게 문의해 주세요.');
+                    }
                     window.location.href = '/fe-ui/sign_in.html';
                     return null;
                 }

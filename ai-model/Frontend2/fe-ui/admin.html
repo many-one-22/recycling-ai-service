@@ -26,21 +26,30 @@
   <div class="tabs">
     <button class="tab active" id="tabUsers" type="button">사용자</button>
     <button class="tab" id="tabReports" type="button">오류 제보</button>
+        <button class="tab" id="tabStats" type="button">통계</button>
     <button class="refresh" id="btnRefresh" type="button">새로고침</button>
   </div>
 
-  <div class="card" id="panelUsers">
-    <table>
-      <thead><tr><th>ID</th><th>이메일</th><th class="num">재활용 개수</th><th>가입일</th></tr></thead>
-      <tbody id="usersBody"></tbody>
-    </table>
+    <div id="panelUsers">
+    <div id="usersList"></div>
   </div>
 
-  <div class="card hidden" id="panelReports">
-    <table>
-      <thead><tr><th>ID</th><th>작성자</th><th>내용</th><th>상태</th><th>접수일</th></tr></thead>
-      <tbody id="reportsBody"></tbody>
-    </table>
+    <div class="hidden" id="panelReports">
+    <div class="chips" id="reportFilter">
+      <button class="chip active" type="button" data-status="">전체</button>
+      <button class="chip" type="button" data-status="대기중">대기중</button>
+      <button class="chip" type="button" data-status="처리완료">처리완료</button>
+      <button class="chip" type="button" data-status="반려">반려</button>
+    </div>
+    <div id="reportsList"></div>
+  </div>
+  
+  <div class="hidden" id="panelStats">
+    <div class="kpis" id="kpis"></div>
+    <div class="chart-card"><h3>최근 7일 재활용 개수</h3><div id="chartDaily"></div></div>
+    <div class="chart-card"><h3>품목별 재활용</h3><div id="chartItems"></div></div>
+    <div class="chart-card"><h3>사용자 랭킹 TOP 5</h3><div id="chartRank"></div></div>
+    <div class="chart-card"><h3>제보 처리 현황</h3><div id="chartReports"></div></div>
   </div>
 </main>
 <div id="toast"></div>
@@ -50,6 +59,7 @@
 </div>
 
 <script src="/fe-ui/nav.js"></script>
+<script src="/fe-ui/api-config.js"></script>
 <script src="/fe-ui/admin.js"></script>
 </body>
 </html>
