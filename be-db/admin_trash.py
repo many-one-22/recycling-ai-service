@@ -4,8 +4,12 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = os.path.join(BASE_DIR, "recycling.db")
 
-# 관리자로 쓸 구글 계정. .env 의 ADMIN_EMAIL 로 덮어쓸 수 있음
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "dawon1703@gmail.com")
+# 관리자로 쓸 구글 계정들. .env 의 ADMIN_EMAIL 에 쉼표(,)로 여러 개 적을 수 있음
+_raw_admins = os.getenv("ADMIN_EMAIL", "dawon1703@gmail.com,itsmeon49@gmail.com,gus122415015@gmail.com,dlagkgus123@gmail.com")
+ADMIN_EMAILS = [e.strip().lower() for e in _raw_admins.split(",") if e.strip()]
+if not ADMIN_EMAILS:
+    ADMIN_EMAILS = ["dawon1703@gmail.com"]
+ADMIN_EMAIL = ADMIN_EMAILS[0]  #첫 번째 관리자
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
@@ -106,9 +110,11 @@ def init_db():
             print(f"DB 세팅 완료! (관리자 계정: {admin_email})")
 
         # 이미 DB가 만들어진 뒤여도 관리자 계정은 항상 관리자 권한을 갖도록 보정.
-        # (구글 로그인으로 먼저 가입된 경우에도 관리자로 승격됨)
-        cursor.execute("UPDATE users SET is_admin = 1 WHERE email = ?", (admin_email,))
-        conn.commit()
+        # 관리자 목록 전체를 관리자로 보정 (아직 로그인 전이어도 미리 만들어 둠)
+        for email in ADMIN_EMAILS:
+            cursor.execute("INSERT OR IGNORE INTO users (email, is_admin) VALUES (?, 1)", (email,))
+            cursor.execute("UPDATE users SET is_admin = 1 WHERE email = ?", (email,))
+            conn.commit()
     finally:
         conn.close()
 
