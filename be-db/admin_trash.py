@@ -4,8 +4,33 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = os.path.join(BASE_DIR, "recycling.db")
 
-# 관리자로 쓸 구글 계정. .env 의 ADMIN_EMAIL 로 덮어쓸 수 있음
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "dawon1703@gmail.com")
+# .env 를 여기서 직접 읽는다.
+#   auth.py 가 이 파일을 load_dotenv() 보다 먼저 불러오기 때문에,
+#   여기서 읽지 않으면 .env 의 ADMIN_EMAILS 가 무시된다.
+#   admin_trash.py 를 단독으로 돌릴 때도 같은 값을 써야 하고.
+try:
+    from dotenv import load_dotenv
+
+    load_dotenv(os.path.join(os.path.dirname(BASE_DIR), ".env"))
+except ImportError:
+    pass
+
+# 관리자로 쓸 구글 계정. 여러 명이면 쉼표로 구분한다.
+#   .env 예시:  ADMIN_EMAILS=dawon1703@gmail.com,팀원@gmail.com
+# 예전 이름인 ADMIN_EMAIL 도 그대로 동작한다.
+_ADMIN_RAW = os.getenv("ADMIN_EMAILS") or os.getenv("ADMIN_EMAIL") or "dawon1703@gmail.com"
+
+# DB 에는 이메일을 전부 소문자로 넣으므로 여기서도 맞춰둔다.
+# (대문자가 섮이면 조용히 관리자가 안 되는 일이 생긴다)
+ADMIN_EMAILS = [e.strip().lower() for e in _ADMIN_RAW.split(",") if e.strip()]
+
+# 예전 이름을 참조하는 코드가 있을 수 있어 남겨둔다
+ADMIN_EMAIL = ADMIN_EMAILS[0] if ADMIN_EMAILS else ""
+
+
+def is_admin_email(email: str) -> bool:
+    """이 이메일이 관리자 목록에 있는가"""
+    return (email or "").strip().lower() in ADMIN_EMAILS
 
 def get_db_connection():
     conn = sqlite3.connect(DB_NAME)
@@ -92,22 +117,27 @@ def init_db():
                 pass
         conn.commit()
 
-        # 관리자로 쓸 구글 계정 (이 이메일로 로그인하면 관리자 권한)
-        admin_email = ADMIN_EMAIL
-
+        # 관리자로 쓸 구글 계정들 (이 이메일로 로그인하면 관리자 권한)
         cursor.execute("SELECT COUNT(*) FROM users")
         if cursor.fetchone()[0] == 0:
-            cursor.execute("INSERT INTO users (email, is_admin) VALUES (?, ?)", (admin_email, 1))
+            for admin_email in ADMIN_EMAILS:
+                cursor.execute("INSERT INTO users (email, is_admin) VALUES (?, ?)", (admin_email, 1))
+
             cursor.execute("INSERT INTO users (email, recycled_count, is_admin) VALUES (?, ?, ?)", ('user1@test.com', 15, 0))
+            # 관리자 수에 따라 id 가 밀리므로 방금 넣은 id 를 직접 받아온다
+            demo_user_id = cursor.lastrowid
             cursor.execute("INSERT INTO users (email, recycled_count, is_admin) VALUES (?, ?, ?)", ('user2@test.com', 5, 0))
-            
-            cursor.execute("INSERT INTO reports (user_id, content) VALUES (?, ?)", (2, "페트병 라벨 인식이 가끔 안 됩니다. 확인 부탁드려요."))
+
+            cursor.execute("INSERT INTO reports (user_id, content) VALUES (?, ?)", (demo_user_id, "페트병 라벨 인식이 가끔 안 됩니다. 확인 부탁드려요."))
             conn.commit()
-            print(f"DB 세팅 완료! (관리자 계정: {admin_email})")
+            print(f"DB 세팅 완료! (관리자 계정: {', '.join(ADMIN_EMAILS)})")
 
         # 이미 DB가 만들어진 뒤여도 관리자 계정은 항상 관리자 권한을 갖도록 보정.
         # (구글 로그인으로 먼저 가입된 경우에도 관리자로 승격됨)
-        cursor.execute("UPDATE users SET is_admin = 1 WHERE email = ?", (admin_email,))
+        # 관리자에서 뺀 사람을 여기서 강등시키지는 않는다.
+        # 손으로 권한을 준 사람까지 날아가면 곤란해지기 때문.
+        for admin_email in ADMIN_EMAILS:
+            cursor.execute("UPDATE users SET is_admin = 1 WHERE email = ?", (admin_email,))
         conn.commit()
     finally:
         conn.close()
@@ -148,12 +178,35 @@ def create_user(email: str, name: str = None, picture: str = None) -> bool: #사
         conn.close()
 
 #로그인 요청 시, 이미 가입된 사람인지 확인하고, 없으면 가입시키는 함수 (= 회원가입)
+def _sync_admin_flag(email: str):
+    """.env 의 관리자 목록에 있는 사람이면 관리자로 올려준다.
+
+    로그인할 때마다 확인하므로,
+    이미 가입해서 쓰던 팀원을 나중에 .env 에 추가해도
+    그 사람이 다음번 로그인하는 순간 관리자가 된다.
+    (DB 를 손으로 고칠 필요 없음)
+
+    반대로 목록에서 빠졌다고 권한을 빼지는 않는다.
+    손으로 is_admin 을 준 사람까지 날아가면 곤란해지기 때문이다.
+    권한을 회수하려면 .env 에서 지우고 아래 SQL 을 한 번 돌릴 것:
+        UPDATE users SET is_admin = 0 WHERE email = '주소';
+    """
+    if not is_admin_email(email):
+        return
+    conn = get_db_connection()
+    try:
+        conn.execute("UPDATE users SET is_admin = 1 WHERE email = ?", (email,))
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def get_or_create_user(email: str, name: str = None, picture: str = None):
     email = email.strip().lower()
     user = get_user_by_email(email)
 
     if user:
-        # 이미 가입된 사람이면, 구글 프로필이 바뀌었을 수 있으니 최신값으로 갱신
+        # 이미 가입된 사람이면, 구글 프로필이 바뀜을 수 있으니 최신값으로 갱신
         if name or picture:
             conn = get_db_connection()
             try:
@@ -164,11 +217,12 @@ def get_or_create_user(email: str, name: str = None, picture: str = None):
                 conn.commit()
             finally:
                 conn.close()
-            user = get_user_by_email(email)
-        return user
+        _sync_admin_flag(email)
+        return get_user_by_email(email)
 
     # 처음 온 사람이면 가입 시키고 정보 반환
     create_user(email, name, picture)
+    _sync_admin_flag(email)
     return get_user_by_email(email)
 
 def set_notify_enabled(user_id: int, enabled: bool) -> bool: #알림 설정
