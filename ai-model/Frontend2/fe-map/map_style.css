@@ -318,3 +318,50 @@ html, body {
   align-items: center;
   justify-content: center;
 }
+
+/* ---- 데이터가 없는 품목 칩 ---- */
+/* 눌러도 마커가 0개라 빈 지도가 뜨던 것을, 흐리게 표시해 미리 알려준다 */
+.chip-empty {
+  opacity: 0.4;
+  background-color: #f4f6f4;
+  color: #9aa49e;
+  cursor: default;
+}
+
+.chip-empty:hover {
+  opacity: 0.55;
+}
+
+/* ---- 칩 줄 마우스 드래그 ---- */
+.filter-scroll {
+  cursor: grab;
+  user-select: none;
+}
+
+.filter-scroll.dragging {
+  cursor: grabbing;
+}
+
+/* ---- 안내 메시지 ---- */
+.map-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 96px;
+  transform: translateX(-50%) translateY(6px);
+  background: rgba(25, 28, 27, 0.92);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 20px;
+  white-space: nowrap;
+  z-index: 60;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.map-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

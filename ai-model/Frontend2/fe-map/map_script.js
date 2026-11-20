@@ -51,6 +51,7 @@ async function loadInitialData() {
     ];
 
     renderMarkers(centerData);
+    updateChipStates();
 
     try {
         const [centersRes, rulesRes, sourcesRes] = await Promise.all([
@@ -64,6 +65,7 @@ async function loadInitialData() {
             if (serverCenters && serverCenters.length > 0) {
                 centerData = serverCenters;
                 renderMarkers(centerData);
+                updateChipStates();
             }
         }
         if (rulesRes.ok) exchangeRulesData = await rulesRes.json();
@@ -72,6 +74,64 @@ async function loadInitialData() {
     } catch (e) {
         console.log("백엔드 미연결 상태: 목업 데이터 사용 중");
     }
+}
+
+// -------------------------------------------------------------
+// 품목 칩 상태 갱신
+//   수거함 데이터가 실제로 있는 품목만 누를 수 있게 한다.
+//   데이터가 없는 칩을 그냥 두면, 눌렀을 때 빈 지도가 떠서 고장처럼 보인다.
+// -------------------------------------------------------------
+function availableCategories(data) {
+    const set = new Set();
+    data.forEach(item => {
+        if (!item.items) return;
+        const list = typeof item.items === 'string'
+            ? item.items.split(';').map(i => i.trim())
+            : item.items;
+        list.forEach(i => { if (i) set.add(i); });
+    });
+    return set;
+}
+
+function updateChipStates() {
+    const available = availableCategories(centerData);
+
+    document.querySelectorAll('.chip').forEach(chip => {
+        const category = chip.getAttribute('data-category');
+        if (category === '전체') return;
+
+        const count = category && available.has(category)
+            ? centerData.filter(it => {
+                  const list = typeof it.items === 'string'
+                      ? it.items.split(';').map(i => i.trim())
+                      : (it.items || []);
+                  return list.includes(category);
+              }).length
+            : 0;
+
+        if (count > 0) {
+            chip.classList.remove('chip-empty');
+            chip.removeAttribute('title');
+        } else {
+            chip.classList.add('chip-empty');
+            chip.setAttribute('title', '아직 확인된 수거함 데이터가 없습니다');
+        }
+    });
+}
+
+// 잠깐 떴다 사라지는 안내 메시지
+function showHint(message) {
+    let el = document.getElementById('map-hint');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'map-hint';
+        el.className = 'map-hint';
+        document.querySelector('.app-layout').appendChild(el);
+    }
+    el.textContent = message;
+    el.classList.add('show');
+    clearTimeout(showHint._timer);
+    showHint._timer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 // 지도 마커 표시
@@ -138,6 +198,12 @@ function searchLocation() {
 
 // 품목 필터ing (문자열 세미콜론 구분)
 function onFilterClick(button) {
+    // 데이터가 없는 품목은 지도를 비우지 않고 안내만 띄운다
+    if (button.classList.contains('chip-empty')) {
+        showHint(`${button.getAttribute('data-category')} 수거함은 아직 확인된 데이터가 없어요`);
+        return;
+    }
+
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
     button.classList.add('active');
 
@@ -261,3 +327,49 @@ function openBottomSheet(center) {
 function closeBottomSheet() {
     document.getElementById('bottom-sheet').classList.remove('show');
 }
+
+// -------------------------------------------------------------
+// 품목 칩 줄을 마우스로 끌어서 스크롤
+//   터치(휴대폰)는 기본으로 되지만, 데스크톱 마우스는 드래그가 안 된다.
+//   발표 때 노트북으로 시연하므로 마우스로도 끌 수 있게 한다.
+// -------------------------------------------------------------
+function enableDragScroll(el) {
+    if (!el) return;
+    let down = false, startX = 0, startScroll = 0, moved = 0;
+
+    el.addEventListener('mousedown', (e) => {
+        down = true; moved = 0;
+        startX = e.pageX;
+        startScroll = el.scrollLeft;
+        el.classList.add('dragging');
+    });
+
+    const stop = () => { down = false; el.classList.remove('dragging'); };
+    el.addEventListener('mouseleave', stop);
+    window.addEventListener('mouseup', stop);
+
+    el.addEventListener('mousemove', (e) => {
+        if (!down) return;
+        e.preventDefault();
+        const dx = e.pageX - startX;
+        moved = Math.abs(dx);
+        el.scrollLeft = startScroll - dx;
+    });
+
+    // 끌어서 움직인 뒤에는 칩이 눌리지 않게 막는다
+    el.addEventListener('click', (e) => {
+        if (moved > 5) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+
+    // 세로 휠로도 가로 스크롤
+    el.addEventListener('wheel', (e) => {
+        if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+            el.scrollLeft += e.deltaY;
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    enableDragScroll(document.querySelector('.filter-scroll'));
+});

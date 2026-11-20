@@ -6,7 +6,7 @@ Google-login session/token before protected endpoints can be used.
 import importlib.util
 import uuid
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import (
     APIRouter, Depends, HTTPException,
@@ -48,11 +48,11 @@ class RecycleRequest(BaseModel):
 #오류 제보
 class ReportStatusRequest(BaseModel):
     status: str = Field(pattern='^(처리완료|반려)$')
-    admin_label: str | None = Field(default=None, max_length=50)
+    admin_label: Optional[str] = Field(default=None, max_length=50)
 
 #사용자 차단
 class BanRequest(BaseModel):
-    reason: str | None = Field(default=None, max_length=500)
+    reason: Optional[str] = Field(default=None, max_length=500)
 
 
 @router.get('/api/db-health', include_in_schema=True)
@@ -92,8 +92,8 @@ def save_recycle(data: RecycleRequest, user: Annotated[dict, Depends(current_use
 async def save_report(
     user: Annotated[dict, Depends(current_user)],
     content: str = Form(...),
-    ai_label: str | None = Form(None),
-    image: UploadFile | None = File(None)
+    ai_label: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None)
 ):
     content = content.strip()
 
